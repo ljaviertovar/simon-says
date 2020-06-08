@@ -84,6 +84,7 @@
       }
     </style>
   </head>
+
   <body>
     <div class="gameboard">
       <div id="celeste" class="color celeste left" data-color="celeste"></div>
@@ -102,16 +103,21 @@
 
       const btnEmpezar = document.getElementById("btnEmpezar");
 
+      const ULTIMO_NIVEL = 10;
+
       class Juego {
         constructor() {
-          this.inicializar()
-          this.generarSecuencia()
-          this.siguienteNivel()
+          this.inicializar();
+          this.generarSecuencia();
+          setTimeout(this.siguienteNivel(), 500);
         }
 
         inicializar() {
-          btnEmpezar.classList.add("hide")
-          this.nivel = 7
+          // atar al this de la clase, por defecto lleva el this window
+          this.siguienteNivel = this.siguienteNivel.bind(this);
+          this.elegirColor = this.elegirColor.bind(this);
+          btnEmpezar.classList.add("hide");
+          this.nivel = 1;
           this.colores = {
             celeste,
             violeta,
@@ -121,13 +127,15 @@
         }
 
         generarSecuencia() {
-          this.secuencia = new Array(10)
+          this.secuencia = new Array(ULTIMO_NIVEL)
             .fill(0)
             .map((n) => Math.floor(Math.random() * 4));
         }
 
         siguienteNivel() {
+          this.subnivel = 0;
           this.iluminarSecuencia();
+          this.agregarEventosClick();
         }
 
         transformarNumeroAColor(num) {
@@ -140,6 +148,19 @@
               return "naranja";
             case 3:
               return "verde";
+          }
+        }
+
+        transformarColorANumero(color) {
+          switch (color) {
+            case "celeste":
+              return 0;
+            case "violeta":
+              return 1;
+            case "naranja":
+              return 2;
+            case "verde":
+              return 3;
           }
         }
 
@@ -157,6 +178,42 @@
 
         apagarColor(color) {
           this.colores[color].classList.remove("light");
+        }
+
+        agregarEventosClick() {
+          this.colores.celeste.addEventListener("click", this.elegirColor);
+          this.colores.verde.addEventListener("click", this.elegirColor);
+          this.colores.violeta.addEventListener("click", this.elegirColor);
+          this.colores.naranja.addEventListener("click", this.elegirColor);
+        }
+
+        eliminarEventosClick() {
+          this.colores.celeste.removeEventListener("click", this.elegirColor);
+          this.colores.verde.removeEventListener("click", this.elegirColor);
+          this.colores.violeta.removeEventListener("click", this.elegirColor);
+          this.colores.naranja.removeEventListener("click", this.elegirColor);
+        }
+
+        elegirColor(ev) {
+          console.log(ev);
+          const nombreColor = ev.target.dataset.color;
+          const numeroColor = this.transformarColorANumero(nombreColor);
+          this.iluminarColor(nombreColor);
+
+          if (numeroColor === this.secuencia[this.subnivel]) { console.log('entra')
+            this.subnivel++;
+            if (this.subnivel === this.nivel) {
+              this.nivel++;
+              this.eliminarEventosClick();
+              if (this.nivel == ULTIMO_NIVEL + 1) {
+                // ganó
+              } else {console.log('siguinte')
+                setTimeout(this.siguienteNivel, 1500);
+              }
+            }
+          } else {
+            // perdio
+          }
         }
       }
 
