@@ -82,6 +82,9 @@
       .hide {
         display: none;
       }
+      * {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
     </style>
   </head>
 
@@ -95,6 +98,7 @@
         Empezar a jugar!
       </button>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <script>
       const celeste = document.getElementById("celeste");
       const violeta = document.getElementById("violeta");
@@ -116,7 +120,7 @@
           // atar al this de la clase, por defecto lleva el this window
           this.siguienteNivel = this.siguienteNivel.bind(this);
           this.elegirColor = this.elegirColor.bind(this);
-          btnEmpezar.classList.add("hide");
+          this.toggleBtnEmpezar()
           this.nivel = 1;
           this.colores = {
             celeste,
@@ -124,6 +128,13 @@
             naranja,
             verde,
           };
+        }
+
+        toggleBtnEmpezar(){
+          if( btnEmpezar.classList.contains("hide"))
+            btnEmpezar.classList.remove("hide");
+          else
+            btnEmpezar.classList.add("hide");
         }
 
         generarSecuencia() {
@@ -200,21 +211,38 @@
           const numeroColor = this.transformarColorANumero(nombreColor);
           this.iluminarColor(nombreColor);
 
-          if (numeroColor === this.secuencia[this.subnivel]) { console.log('entra')
+          if (numeroColor === this.secuencia[this.subnivel]) {
+            console.log("entra");
             this.subnivel++;
             if (this.subnivel === this.nivel) {
               this.nivel++;
               this.eliminarEventosClick();
               if (this.nivel == ULTIMO_NIVEL + 1) {
-                // ganó
-              } else {console.log('siguinte')
+                this.ganoElJuego();
+              } else {
+                console.log("siguinte");
                 setTimeout(this.siguienteNivel, 1500);
               }
             }
           } else {
-            // perdio
+            this.perdioElJuego();
           }
         }
+
+        ganoElJuego(){
+          swal('Wow!!', 'You win!', 'success')
+          .then(this.inicializar.bind(this))
+        }
+
+        perdioElJuego(){
+          swal('Woops!!', 'You lose!', 'error')
+          .then(() => {
+            this.eliminarEventosClick()
+            this.inicializar() 
+          })
+        }
+
+
       }
 
       function empezarJuego() {
